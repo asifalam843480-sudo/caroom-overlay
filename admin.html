@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Indian Pro Switchboard</title>
+    <title>Indian Pro Boss Panel</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
         .box { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #00e676; }
@@ -29,80 +29,72 @@
 </head>
 <body>
 
-    <!-- 1. Player Setup -->
     <div class="box">
-        <h2>1. Match Setup</h2>
+        <h2>1. Toss Setup</h2>
         <div class="flex-row">
             <input type="text" id="p1-name" value="PLAYER 1" oninput="save()">
             <input type="text" id="p2-name" value="PLAYER 2" oninput="save()">
         </div>
-        <div class="label-sm">Toss Winner (Gets White):</div>
         <div class="flex-row">
             <button class="btn-dark" onclick="toss(1)">P1 Won Toss</button>
             <button class="btn-dark" onclick="toss(2)">P2 Won Toss</button>
         </div>
     </div>
 
-    <!-- 2. Live Action (Turns, Faults, Queen) -->
     <div class="box box-red">
-        <h2>2. Live Action Board</h2>
+        <h2>2. Live Board Action</h2>
         
-        <div class="label-sm">Kaun Goti Pila Raha Hai? (Turn Indicator):</div>
         <div class="flex-row">
             <button class="btn-neon" onclick="setTurn(1)">🟩 TURN P1</button>
             <button class="btn-neon" onclick="setTurn(2)">🟩 TURN P2</button>
         </div>
 
-        <div class="label-sm">Fault (Trigger Siren):</div>
         <div class="flex-row">
             <button class="btn-red" onclick="triggerFoul(1)">🚨 FAULT P1</button>
             <button class="btn-red" onclick="triggerFoul(2)">🚨 FAULT P2</button>
         </div>
 
-        <div class="label-sm">Queen Secured:</div>
         <div class="flex-row">
-            <button class="btn-red" onclick="setQueen(1)">🔴 P1 SECURED RED</button>
-            <button class="btn-red" onclick="setQueen(2)">🔴 P2 SECURED RED</button>
+            <button class="btn-red" onclick="setQueen(1)">🔴 P1 RED</button>
+            <button class="btn-red" onclick="setQueen(2)">🔴 P2 RED</button>
         </div>
         <button class="btn-dark" style="margin-top:5px;" onclick="setQueen(0)">Undo Red</button>
     </div>
 
-    <!-- 3. Final Board Calculator -->
     <div class="box">
-        <h2>3. Target 29 Calculator</h2>
-        <div class="label-sm">Auto-detects NIL if opponent goti = 9</div>
+        <h2>3. Board Calculator & History</h2>
         
-        <label>Jeeta Kaun?</label>
         <select id="board-winner">
-            <option value="1">PLAYER 1</option>
-            <option value="2">PLAYER 2</option>
+            <option value="1">P1 NE BOARD JEETA</option>
+            <option value="2">P2 NE BOARD JEETA</option>
         </select>
 
-        <label>Haarne wale ki goti kitni bachi? (Max 9)</label>
+        <label class="label-sm">Haarne wale ki goti kitni bachi? (Max 9)</label>
         <input type="number" id="coins-left" placeholder="Enter 0 to 9" min="0" max="9">
 
-        <button class="btn-green" onclick="calcBoard()" style="margin-top: 10px; font-size: 20px;">✅ CALCULATE SCORE</button>
+        <button class="btn-green" onclick="calcBoard()" style="margin-top: 10px; font-size: 20px;">✅ SUBMIT BOARD POINTS</button>
     </div>
 
-    <!-- 4. Special Hype -->
     <div class="box box-fire">
         <h2>4. Hype Controls</h2>
-        <div class="label-sm">Jab koi ekdum solid finish kare, ye dabao:</div>
-        <button class="btn-fire" onclick="triggerHeat()">🔥 TRIGGER HEAT FINISH</button>
+        <button class="btn-fire" onclick="triggerHeat()">🔥 PREMIUM HEAT FINISH</button>
+        <button class="btn-dark" style="margin-top:15px;" onclick="resetMatch()">🔄 RESET FULL MATCH</button>
     </div>
 
     <script>
         let s = { 
             p1Name:"PLAYER 1", p2Name:"PLAYER 2", p1Score:0, p2Score:0, 
-            p1Color:"white", p2Color:"black", turn: 1, queen:0, matchWinner: 0,
-            foulId: null, foulPlayer: 0, nilId: null, heatId: null
+            p1Color:"white", p2Color:"black", turn: 1, queen:0, board:1, matchWinner: 0,
+            foulId: null, foulPlayer: 0, nilId: null, heatId: null,
+            history: [] // Auto stores board by board data
         };
 
         function save() {
             s.p1Name = document.getElementById('p1-name').value;
             s.p2Name = document.getElementById('p2-name').value;
-            localStorage.setItem('carromIndiaState', JSON.stringify(s));
-            localStorage.setItem('ping', Date.now()); 
+            // Changed LocalStorage Key to avoid conflicts with old cached version
+            localStorage.setItem('carromIndiaPro', JSON.stringify(s));
+            localStorage.setItem('pingPro', Date.now()); 
         }
 
         function toss(winner) {
@@ -111,52 +103,53 @@
             save();
         }
 
-        // Live Actions
         function setTurn(player) { s.turn = player; save(); }
-        
-        function triggerFoul(player) {
-            s.foulPlayer = player;
-            s.foulId = Date.now(); // Creates unique trigger for animation
-            save();
-        }
-
+        function triggerFoul(player) { s.foulPlayer = player; s.foulId = Date.now(); save(); }
         function setQueen(player) { s.queen = player; save(); }
+        function triggerHeat() { s.heatId = Date.now(); save(); }
 
-        function triggerHeat() {
-            s.heatId = Date.now();
-            save();
-        }
-
-        // The Calculator (With Nil Detection)
         function calcBoard() {
-            if(s.matchWinner !== 0) { alert("Match khatam! Reset karo."); return; }
+            if(s.matchWinner !== 0) { alert("Match pehle hi khatam hai!"); return; }
 
             let winner = parseInt(document.getElementById('board-winner').value);
             let coinsLeft = parseInt(document.getElementById('coins-left').value);
             
-            if(isNaN(coinsLeft)) { alert("Goti ka number dalo!"); return; }
+            if(isNaN(coinsLeft)) { alert("Goti ka number dalo bhai!"); return; }
 
-            // Math Magic
+            let b_p1 = 0; let b_p2 = 0;
             let boardPoints = coinsLeft; 
             if(s.queen === winner) boardPoints += 5; 
 
-            if(winner === 1) s.p1Score += boardPoints;
-            if(winner === 2) s.p2Score += boardPoints;
+            if(winner === 1) { b_p1 = boardPoints; s.p1Score += b_p1; }
+            if(winner === 2) { b_p2 = boardPoints; s.p2Score += b_p2; }
 
-            // Trigger NIL Animation if opponent had 9 coins
-            if(coinsLeft === 9) s.nilId = Date.now();
+            // Save history for UI
+            s.history.push({ board: s.board, p1: b_p1, p2: b_p2 });
 
             // Target 29
-            if(s.p1Score >= 29) s.matchWinner = 1;
-            else if(s.p2Score >= 29) s.matchWinner = 2;
+            if(s.p1Score >= 29) {
+                s.matchWinner = 1;
+                if(s.p2Score === 0) s.nilId = Date.now(); // TRUE NIL RULE
+            } else if(s.p2Score >= 29) {
+                s.matchWinner = 2;
+                if(s.p1Score === 0) s.nilId = Date.now(); // TRUE NIL RULE
+            }
 
             if(s.matchWinner === 0) {
+                s.board += 1;
                 s.queen = 0; 
                 let temp = s.p1Color; s.p1Color = s.p2Color; s.p2Color = temp; 
             }
 
             save();
             document.getElementById('coins-left').value = '';
+        }
+
+        function resetMatch() {
+            if(confirm("Pura match zero se shuru karein? History delete ho jayegi.")) {
+                s.p1Score=0; s.p2Score=0; s.board=1; s.queen=0; s.matchWinner=0; s.history=[];
+                save();
+            }
         }
 
         save();
