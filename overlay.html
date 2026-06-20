@@ -2,26 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Indian Pro Carrom - 29 Target</title>
+    <title>Indian Pro Carrom - Premium Animation</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;900&display=swap');
         
-        body { margin: 0; padding: 0; font-family: 'Chakra Petch', sans-serif; color: white; overflow: hidden; }
+        body { margin: 0; padding: 0; font-family: 'Chakra Petch', sans-serif; color: white; overflow: hidden; background: transparent;}
         
+        /* Main Container */
         .hud-wrapper {
             position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; justify-content: center;
             background: rgba(10, 10, 15, 0.95);
             border: 2px solid #444; border-radius: 12px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.9);
-            padding: 5px; transition: 0.5s ease;
+            padding: 5px; transition: 0.5s ease; z-index: 10;
         }
 
+        /* Player Box */
         .player-panel {
             display: flex; align-items: center; padding: 10px 20px;
-            width: 380px; position: relative; transition: 0.5s ease;
+            width: 380px; position: relative; transition: 0.3s ease;
+            border-bottom: 4px solid transparent; /* Turn Indicator Base */
         }
         
+        /* 🔥 THE TURN INDICATOR (Neon Glow) */
+        .active-turn { 
+            border-bottom: 4px solid #00e676; 
+            background: linear-gradient(0deg, rgba(0,230,118,0.1) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: inset 0 -20px 20px -20px #00e676;
+        }
+
         .p1-side { justify-content: flex-start; }
         .p2-side { justify-content: flex-end; flex-direction: row-reverse; text-align: right; }
 
@@ -54,34 +64,82 @@
         .board-text { font-size: 20px; letter-spacing: 3px; font-weight: 500; color: #ffcdd2; }
         .board-num { font-size: 60px; font-weight: 700; line-height: 0.9; }
 
-        /* The 29-Point Dominance CSS */
+        /* 🚨 FOUL ANIMATION (Siren Strobe) */
+        @keyframes foulStrobe { 
+            0%, 100% { background: rgba(10,10,15,0.95); } 
+            50% { background: #ff0000; box-shadow: 0 0 50px #ff0000; } 
+        }
+        .foul-active { animation: foulStrobe 0.2s 5; } /* Blinks 5 times rapidly */
+        
+        .foul-text { 
+            position: absolute; top: -50px; color: #ff1744; font-size: 30px; font-weight: 900; 
+            text-shadow: 0 0 20px #ff1744; letter-spacing: 3px; opacity: 0; transition: 0.2s;
+        }
+        .foul-active .foul-text { opacity: 1; transform: scale(1.2); }
+        .p1-side .foul-text { left: 20px; } .p2-side .foul-text { right: 20px; }
+
+        /* 👑 29-POINT VICTORY */
         .winner-tag {
             position: absolute; top: -40px; font-size: 30px; font-weight: 900; color: #ffd700;
             text-shadow: 0 0 20px #ffd700; letter-spacing: 5px; opacity: 0; transition: 0.5s;
         }
-        .p1-side .winner-tag { left: 20px; }
-        .p2-side .winner-tag { right: 20px; }
+        .p1-side .winner-tag { left: 20px; } .p2-side .winner-tag { right: 20px; }
 
-        /* When someone hits 29 */
         body.match-over-1 .p2-side { opacity: 0.15; filter: grayscale(100%); }
         body.match-over-1 .p1-side { transform: scale(1.05); }
         body.match-over-1 .p1-side .winner-tag { opacity: 1; animation: blink 1s infinite alternate; }
-        body.match-over-1 .center-board { filter: grayscale(100%); opacity: 0.5; }
-
+        
         body.match-over-2 .p1-side { opacity: 0.15; filter: grayscale(100%); }
         body.match-over-2 .p2-side { transform: scale(1.05); }
         body.match-over-2 .p2-side .winner-tag { opacity: 1; animation: blink 1s infinite alternate; }
-        body.match-over-2 .center-board { filter: grayscale(100%); opacity: 0.5; }
 
         @keyframes blink { 0% { text-shadow: 0 0 10px #ffd700; } 100% { text-shadow: 0 0 40px #ffd700, 0 0 20px #fff; } }
+
+        /* 💀 THE NIL STAMP ANIMATION */
+        .nil-stamp { 
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(5); 
+            color: #ff1744; font-size: 120px; font-weight: 900; border: 12px solid #ff1744; 
+            padding: 10px 50px; text-transform: uppercase; opacity: 0; pointer-events: none; 
+            z-index: 100; text-shadow: 0 0 20px rgba(0,0,0,0.8); background: rgba(0,0,0,0.5);
+        }
+        .show-nil { animation: stampDown 2s forwards; }
+        @keyframes stampDown { 
+            0% { transform: translate(-50%, -50%) scale(5); opacity: 0; } 
+            15% { transform: translate(-50%, -50%) scale(1) rotate(-10deg); opacity: 1; box-shadow: 0 0 50px #ff1744; } 
+            80% { transform: translate(-50%, -50%) scale(1) rotate(-10deg); opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        /* 🔥 HEAT FINISH FX */
+        .heat-fx {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; 
+            opacity: 0; z-index: 1; background: radial-gradient(circle, transparent 30%, rgba(255,87,34,0.6) 100%);
+            box-shadow: inset 0 0 150px #ff5722; transition: 0.5s;
+        }
+        .show-heat { opacity: 1; animation: firePulse 0.5s infinite alternate; }
+        @keyframes firePulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+        
+        .heat-text {
+            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 100px; color: #ffeb3b; font-weight: 900; text-shadow: 0 10px 30px #ff5722;
+            opacity: 0; z-index: 100;
+        }
+        .show-heat .heat-text { opacity: 1; animation: floatUp 3s forwards; }
+        @keyframes floatUp { 0% { transform: translate(-50%, -30%); opacity: 0; } 20% { transform: translate(-50%, -50%); opacity: 1; } 80% { transform: translate(-50%, -60%); opacity: 1; } 100% { transform: translate(-50%, -80%); opacity: 0; } }
 
     </style>
 </head>
 <body>
 
+    <!-- Event Overlays -->
+    <div class="nil-stamp" id="nil-graphic">NIL FINISH!</div>
+    <div class="heat-fx" id="heat-graphic"></div>
+    <div class="heat-text" id="heat-text">🔥 HEAT FINISH 🔥</div>
+
     <div class="hud-wrapper">
         <!-- Player 1 -->
         <div class="player-panel p1-side" id="p1-box">
+            <div class="foul-text">FAULT!</div>
             <div class="winner-tag">👑 WINNER</div>
             <div class="coin-indicator white-coin" id="p1-coin"></div>
             <div class="name-box">
@@ -99,6 +157,7 @@
 
         <!-- Player 2 -->
         <div class="player-panel p2-side" id="p2-box">
+            <div class="foul-text">FAULT!</div>
             <div class="winner-tag">👑 WINNER</div>
             <div class="coin-indicator black-coin" id="p2-coin"></div>
             <div class="name-box">
@@ -110,23 +169,53 @@
     </div>
 
     <script>
+        let lastFoul = 0; let lastNil = 0; let lastHeat = 0;
+
         window.addEventListener('storage', () => {
             let data = JSON.parse(localStorage.getItem('carromIndiaState') || '{}');
             if(!data.p1Name) return;
 
+            // Basic Data Update
             document.getElementById('p1-name').innerText = data.p1Name;
             document.getElementById('p2-name').innerText = data.p2Name;
-            
             document.getElementById('p1-score').innerText = data.p1Score;
             document.getElementById('p2-score').innerText = data.p2Score;
-            
             document.getElementById('p1-coin').className = 'coin-indicator ' + data.p1Color + '-coin';
             document.getElementById('p2-coin').className = 'coin-indicator ' + data.p2Color + '-coin';
-
             document.getElementById('p1-queen').classList.toggle('active', data.queen === 1);
             document.getElementById('p2-queen').classList.toggle('active', data.queen === 2);
 
-            // The 29 Point Master Trigger
+            // 🎯 TURN INDICATOR
+            document.getElementById('p1-box').classList.toggle('active-turn', data.turn === 1);
+            document.getElementById('p2-box').classList.toggle('active-turn', data.turn === 2);
+
+            // 🚨 FOUL GLITCH TRIGGER
+            if(data.foulId !== lastFoul && data.foulId) {
+                lastFoul = data.foulId;
+                let box = data.foulPlayer === 1 ? document.getElementById('p1-box') : document.getElementById('p2-box');
+                box.classList.remove('foul-active'); void box.offsetWidth; // Reset animation
+                box.classList.add('foul-active');
+                setTimeout(() => box.classList.remove('foul-active'), 1500); // Auto remove after 1.5s
+            }
+
+            // 💀 NIL FINISH TRIGGER
+            if(data.nilId !== lastNil && data.nilId) {
+                lastNil = data.nilId;
+                let nilEl = document.getElementById('nil-graphic');
+                nilEl.classList.remove('show-nil'); void nilEl.offsetWidth;
+                nilEl.classList.add('show-nil');
+            }
+
+            // 🔥 HEAT FINISH TRIGGER
+            if(data.heatId !== lastHeat && data.heatId) {
+                lastHeat = data.heatId;
+                let heatEl = document.getElementById('heat-graphic');
+                let heatText = document.getElementById('heat-text');
+                heatEl.classList.add('show-heat'); heatText.classList.add('show-heat');
+                setTimeout(() => { heatEl.classList.remove('show-heat'); heatText.classList.remove('show-heat'); }, 3000);
+            }
+
+            // 👑 MATCH WINNER
             document.body.className = ''; 
             if(data.matchWinner === 1) document.body.classList.add('match-over-1');
             if(data.matchWinner === 2) document.body.classList.add('match-over-2');
