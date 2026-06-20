@@ -2,99 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Indian Pro Boss Panel</title>
+    <title>Indian Pro - Command Center</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
-        .box { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #00e676; }
-        .box-red { border-left: 5px solid #ff1744; }
-        .box-fire { border-left: 5px solid #ff5722; background: #2a110a; }
-        input[type="text"], input[type="number"], select { 
-            width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #444; color: #fff; font-size: 16px; border-radius: 5px; box-sizing: border-box; font-weight: bold;
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: white; padding: 20px; margin: 0; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; margin: auto;}
+        .box { background: #1a1a1a; padding: 20px; border-radius: 12px; border-top: 4px solid #444; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .box-p1 { border-top-color: #00e676; }
+        .box-p2 { border-top-color: #00e676; }
+        .box-full { grid-column: span 2; border-top-color: #ffc107; background: #1c1a12;}
+        
+        input, select { 
+            width: 100%; padding: 12px; margin-bottom: 15px; background: #000; border: 1px solid #333; color: #fff; font-size: 16px; border-radius: 6px; box-sizing: border-box; text-align: center; font-weight: bold;
         }
         button { 
-            padding: 12px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 10px;
+            padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 10px; text-transform: uppercase;
         }
-        button:active { transform: scale(0.95); }
+        button:active { transform: scale(0.97); }
         
+        .flex-row { display: flex; gap: 10px; }
         .btn-green { background: #00e676; color: black; }
         .btn-red { background: #ff1744; color: white; }
         .btn-dark { background: #333; color: white; }
         .btn-neon { background: transparent; border: 2px solid #00e676; color: #00e676; }
-        .btn-fire { background: linear-gradient(90deg, #ff5722, #ffeb3b); color: black; font-size: 20px; font-style: italic;}
+        .btn-fire { background: linear-gradient(90deg, #ff5722, #ffc107); color: black; font-size: 18px;}
         
-        .flex-row { display: flex; gap: 10px; }
-        h2 { margin-top: 0; font-size: 20px; text-transform: uppercase; color: #aaa; }
-        .label-sm { color:#aaa; font-size: 13px; margin-bottom: 5px; }
+        h2 { margin: 0 0 15px 0; font-size: 16px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px;}
+        .lbl { font-size: 12px; color: #888; margin-bottom: 5px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>1. Toss Setup</h2>
-        <div class="flex-row">
+    <div class="grid-container">
+        
+        <!-- Player 1 Column -->
+        <div class="box box-p1">
+            <h2>Player 1 Controls</h2>
             <input type="text" id="p1-name" value="PLAYER 1" oninput="save()">
-            <input type="text" id="p2-name" value="PLAYER 2" oninput="save()">
-        </div>
-        <div class="flex-row">
-            <button class="btn-dark" onclick="toss(1)">P1 Won Toss</button>
-            <button class="btn-dark" onclick="toss(2)">P2 Won Toss</button>
-        </div>
-    </div>
-
-    <div class="box box-red">
-        <h2>2. Live Board Action</h2>
-        
-        <div class="flex-row">
+            <button class="btn-dark" onclick="toss(1)">P1 WON TOSS (White)</button>
             <button class="btn-neon" onclick="setTurn(1)">🟩 TURN P1</button>
-            <button class="btn-neon" onclick="setTurn(2)">🟩 TURN P2</button>
-        </div>
-
-        <div class="flex-row">
             <button class="btn-red" onclick="triggerFoul(1)">🚨 FAULT P1</button>
+            <button class="btn-red" style="border: 2px solid #fff;" onclick="setQueen(1)">🔴 P1 RED COVERED</button>
+        </div>
+
+        <!-- Player 2 Column -->
+        <div class="box box-p2">
+            <h2>Player 2 Controls</h2>
+            <input type="text" id="p2-name" value="PLAYER 2" oninput="save()">
+            <button class="btn-dark" onclick="toss(2)">P2 WON TOSS (White)</button>
+            <button class="btn-neon" onclick="setTurn(2)">🟩 TURN P2</button>
             <button class="btn-red" onclick="triggerFoul(2)">🚨 FAULT P2</button>
+            <button class="btn-red" style="border: 2px solid #fff;" onclick="setQueen(2)">🔴 P2 RED COVERED</button>
         </div>
 
-        <div class="flex-row">
-            <button class="btn-red" onclick="setQueen(1)">🔴 P1 RED</button>
-            <button class="btn-red" onclick="setQueen(2)">🔴 P2 RED</button>
+        <!-- Center Calculator -->
+        <div class="box box-full">
+            <h2>🎯 Board Target Calculator (History Engine)</h2>
+            <div class="lbl">Rule: Select Winner -> Enter Loser's Coins Left. Magic math will run automatically.</div>
+            
+            <div class="flex-row">
+                <select id="board-winner">
+                    <option value="1">🏆 PLAYER 1 WON THIS BOARD</option>
+                    <option value="2">🏆 PLAYER 2 WON THIS BOARD</option>
+                </select>
+                <input type="number" id="coins-left" placeholder="Opponent Coins Left (0-9)" min="0" max="9">
+            </div>
+            
+            <button class="btn-green" style="font-size: 20px; padding: 15px;" onclick="calcBoard()">✅ ADD POINTS TO HISTORY</button>
+            <button class="btn-dark" style="margin-top: 5px;" onclick="setQueen(0)">UNDO RED (Back to Center)</button>
         </div>
-        <button class="btn-dark" style="margin-top:5px;" onclick="setQueen(0)">Undo Red</button>
-    </div>
 
-    <div class="box">
-        <h2>3. Board Calculator & History</h2>
-        
-        <select id="board-winner">
-            <option value="1">P1 NE BOARD JEETA</option>
-            <option value="2">P2 NE BOARD JEETA</option>
-        </select>
+        <!-- Special FX -->
+        <div class="box box-full" style="border-top-color: #ff5722;">
+            <h2>🎬 Director FX & Overrides</h2>
+            <button class="btn-fire" onclick="triggerHeat()">🔥 TRIGGER PREMIUM HEAT FINISH</button>
+            <button class="btn-dark" style="background: #222; border: 1px solid #ff1744; color: #ff1744;" onclick="resetMatch()">⚠ WIPE FULL MATCH & HISTORY</button>
+        </div>
 
-        <label class="label-sm">Haarne wale ki goti kitni bachi? (Max 9)</label>
-        <input type="number" id="coins-left" placeholder="Enter 0 to 9" min="0" max="9">
-
-        <button class="btn-green" onclick="calcBoard()" style="margin-top: 10px; font-size: 20px;">✅ SUBMIT BOARD POINTS</button>
-    </div>
-
-    <div class="box box-fire">
-        <h2>4. Hype Controls</h2>
-        <button class="btn-fire" onclick="triggerHeat()">🔥 PREMIUM HEAT FINISH</button>
-        <button class="btn-dark" style="margin-top:15px;" onclick="resetMatch()">🔄 RESET FULL MATCH</button>
     </div>
 
     <script>
         let s = { 
             p1Name:"PLAYER 1", p2Name:"PLAYER 2", p1Score:0, p2Score:0, 
-            p1Color:"white", p2Color:"black", turn: 1, queen:0, board:1, matchWinner: 0,
+            p1Color:"white", p2Color:"black", turn: 1, queen:0, matchWinner: 0,
             foulId: null, foulPlayer: 0, nilId: null, heatId: null,
-            history: [] // Auto stores board by board data
+            history: [] // Master Array for Board History
         };
 
         function save() {
             s.p1Name = document.getElementById('p1-name').value;
             s.p2Name = document.getElementById('p2-name').value;
-            // Changed LocalStorage Key to avoid conflicts with old cached version
-            localStorage.setItem('carromIndiaPro', JSON.stringify(s));
-            localStorage.setItem('pingPro', Date.now()); 
+            // NEW STORAGE KEY: Forces clean state
+            localStorage.setItem('carromFinalSync', JSON.stringify(s));
+            localStorage.setItem('pingFinal', Date.now()); 
         }
 
         function toss(winner) {
@@ -109,7 +108,7 @@
         function triggerHeat() { s.heatId = Date.now(); save(); }
 
         function calcBoard() {
-            if(s.matchWinner !== 0) { alert("Match pehle hi khatam hai!"); return; }
+            if(s.matchWinner !== 0) { alert("Match Khatam! Reset button dabao."); return; }
 
             let winner = parseInt(document.getElementById('board-winner').value);
             let coinsLeft = parseInt(document.getElementById('coins-left').value);
@@ -118,27 +117,27 @@
 
             let b_p1 = 0; let b_p2 = 0;
             let boardPoints = coinsLeft; 
-            if(s.queen === winner) boardPoints += 5; 
+            if(s.queen === winner) boardPoints += 5; // Adds 5 if winner secured Red
 
             if(winner === 1) { b_p1 = boardPoints; s.p1Score += b_p1; }
             if(winner === 2) { b_p2 = boardPoints; s.p2Score += b_p2; }
 
-            // Save history for UI
-            s.history.push({ board: s.board, p1: b_p1, p2: b_p2 });
+            // Save to History Array
+            s.history.push({ p1: b_p1, p2: b_p2 });
 
-            // Target 29
+            // TRUE NIL & WINNER LOGIC
             if(s.p1Score >= 29) {
                 s.matchWinner = 1;
-                if(s.p2Score === 0) s.nilId = Date.now(); // TRUE NIL RULE
+                if(s.p2Score === 0) s.nilId = Date.now(); // P1 wins 29 to 0
             } else if(s.p2Score >= 29) {
                 s.matchWinner = 2;
-                if(s.p1Score === 0) s.nilId = Date.now(); // TRUE NIL RULE
+                if(s.p1Score === 0) s.nilId = Date.now(); // P2 wins 29 to 0
             }
 
+            // Prep next board
             if(s.matchWinner === 0) {
-                s.board += 1;
                 s.queen = 0; 
-                let temp = s.p1Color; s.p1Color = s.p2Color; s.p2Color = temp; 
+                let temp = s.p1Color; s.p1Color = s.p2Color; s.p2Color = temp; // Swap White/Black
             }
 
             save();
@@ -146,13 +145,13 @@
         }
 
         function resetMatch() {
-            if(confirm("Pura match zero se shuru karein? History delete ho jayegi.")) {
-                s.p1Score=0; s.p2Score=0; s.board=1; s.queen=0; s.matchWinner=0; s.history=[];
+            if(confirm("Match aur History poori clean karni hai?")) {
+                s.p1Score=0; s.p2Score=0; s.queen=0; s.matchWinner=0; s.history=[];
                 save();
             }
         }
 
-        save();
+        save(); // Init
     </script>
 </body>
 </html>
