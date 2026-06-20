@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Indian Rule Calculator</title>
+    <title>Indian Rule Calculator (Target 29)</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
         .box { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #00e676; }
@@ -17,13 +17,16 @@
         .btn-green { background: #00e676; color: black; }
         .btn-red { background: #ff1744; color: white; }
         .btn-dark { background: #333; color: white; }
+        .btn-gold { background: #ffd700; color: black; font-size: 20px;}
         
         .flex-row { display: flex; gap: 10px; }
         h2 { margin-top: 0; font-size: 20px; text-transform: uppercase; color: #aaa; }
+        .alert-text { color: #ffd700; font-size: 14px; margin-bottom: 10px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- 1. Toss -->
     <div class="box">
         <h2>1. Match Setup (Toss)</h2>
         <div class="flex-row">
@@ -34,9 +37,9 @@
         <button class="btn-dark" onclick="toss(2)">P2 Won Toss (Gets White)</button>
     </div>
 
+    <!-- 2. Queen Live -->
     <div class="box box-red">
-        <h2>2. Live Board Action</h2>
-        <p style="color:#aaa; font-size: 14px;">Jaise hi koi RED cover kare, ye button dabao:</p>
+        <h2>2. Live Action</h2>
         <div class="flex-row">
             <button class="btn-red" onclick="setQueen(1)">🔴 P1 Secured RED</button>
             <button class="btn-red" onclick="setQueen(2)">🔴 P2 Secured RED</button>
@@ -44,9 +47,10 @@
         <button class="btn-dark" onclick="setQueen(0)">Undo / Red wapas board pe aayi</button>
     </div>
 
+    <!-- 3. Final Board Calculator -->
     <div class="box">
-        <h2>3. Board Finish Calculator</h2>
-        <p style="color:#aaa; font-size: 14px;">Board khatam hote hi detail dalo, math apne aap hoga (Jaise R+5=10).</p>
+        <h2>3. Organizer Calculator</h2>
+        <p style="color:#aaa; font-size: 14px;">Formula: Red (5) + Bachi Goti (1 each). Nil ka matlab opponent ki 9 goti bachi hain.</p>
         
         <label>Ye Board Kaun Jeeta?</label>
         <select id="board-winner">
@@ -54,71 +58,81 @@
             <option value="2">PLAYER 2 Jeeta</option>
         </select>
 
-        <label>Haarne wale ki kitni Goti (coins) board par bachi hai?</label>
+        <label>Haarne wale ki kitni goti board pe bachi? (Max 9)</label>
         <input type="number" id="coins-left" placeholder="Example: 5" min="0" max="9">
 
-        <button class="btn-green" onclick="calcBoard()" style="margin-top: 15px; font-size: 20px;">✅ CALCULATE & NEXT BOARD</button>
+        <button class="btn-green" onclick="calcBoard()" style="margin-top: 15px; font-size: 20px;">✅ CALCULATE (Target 29)</button>
+        
+        <div id="winner-alert" class="alert-text">🏆 MATCH KHATAM HO GAYA HAI! OVERLAY CHECK KARO!</div>
     </div>
 
+    <!-- Emergency Undo -->
     <div class="box" style="border-left: 5px solid #555;">
-        <h2>Manual Score Edit</h2>
+        <h2>Manual Override</h2>
         <div class="flex-row">
             <button class="btn-dark" onclick="modScore('p1Score', -1)">P1 Score -1</button>
             <button class="btn-dark" onclick="modScore('p2Score', -1)">P2 Score -1</button>
         </div>
-        <button class="btn-dark" onclick="resetMatch()">⚠ RESET FULL MATCH</button>
+        <button class="btn-gold" onclick="resetMatch()">🔄 START NEW MATCH</button>
     </div>
 
     <script>
-        let s = { p1Name:"PLAYER 1", p2Name:"PLAYER 2", p1Score:0, p2Score:0, p1Color:"white", p2Color:"black", board:1, queen:0 };
+        let s = { p1Name:"PLAYER 1", p2Name:"PLAYER 2", p1Score:0, p2Score:0, p1Color:"white", p2Color:"black", board:1, queen:0, matchWinner: 0 };
 
         function save() {
             s.p1Name = document.getElementById('p1-name').value;
             s.p2Name = document.getElementById('p2-name').value;
             localStorage.setItem('carromIndiaState', JSON.stringify(s));
             localStorage.setItem('ping', Date.now()); 
+            
+            document.getElementById('winner-alert').style.display = s.matchWinner ? 'block' : 'none';
         }
 
-        // Toss Set
         function toss(winner) {
             if(winner === 1) { s.p1Color = "white"; s.p2Color = "black"; }
             else { s.p1Color = "black"; s.p2Color = "white"; }
-            alert("Toss Update: " + (winner===1?s.p1Name:s.p2Name) + " ko White mil gaya!");
             save();
         }
 
         function setQueen(player) { s.queen = player; save(); }
 
-        // The Magic Calculator
         function calcBoard() {
+            if(s.matchWinner !== 0) { alert("Match pehle hi khatam ho chuka hai! Naya match start karo."); return; }
+
             let winner = parseInt(document.getElementById('board-winner').value);
             let coinsLeft = parseInt(document.getElementById('coins-left').value);
             
             if(isNaN(coinsLeft)) { alert("Bhai, bachi hui goti ka number dalo!"); return; }
 
-            // Step 1: Jisne Red (Queen) li usko 5 point de do.
-            if(s.queen === 1) s.p1Score += 5;
-            if(s.queen === 2) s.p2Score += 5;
+            // Math Magic: Organizer Rule
+            let boardPoints = coinsLeft; // Normal goti
+            if(s.queen === winner) boardPoints += 5; // Agar jeetne wale ne hi Red li thi
 
-            // Step 2: Jo Jeeta usko bachi hui goti (coins) ka point de do.
-            if(winner === 1) s.p1Score += coinsLeft;
-            if(winner === 2) s.p2Score += coinsLeft;
+            // Score update
+            if(winner === 1) s.p1Score += boardPoints;
+            if(winner === 2) s.p2Score += boardPoints;
 
-            // Step 3: Agla board set karo aur color palat do.
-            s.board += 1;
-            s.queen = 0; 
-            let temp = s.p1Color; s.p1Color = s.p2Color; s.p2Color = temp; 
+            // Target 29 Check
+            if(s.p1Score >= 29) s.matchWinner = 1;
+            else if(s.p2Score >= 29) s.matchWinner = 2;
+
+            // Prepare Next Board if not won
+            if(s.matchWinner === 0) {
+                s.board += 1;
+                s.queen = 0; 
+                let temp = s.p1Color; s.p1Color = s.p2Color; s.p2Color = temp; 
+                alert("Score Update ho gaya. White/Black palat diye hain agle round ke liye.");
+            }
 
             save();
             document.getElementById('coins-left').value = '';
-            alert("✅ Score lag gaya! Aur agle board ke liye White/Black palat diye gaye hain.");
         }
 
         function modScore(player, val) { s[player] = Math.max(0, s[player] + val); save(); }
 
         function resetMatch() {
-            if(confirm("Pura match zero se shuru karein?")) {
-                s.p1Score=0; s.p2Score=0; s.board=1; s.queen=0; s.p1Color="white"; s.p2Color="black";
+            if(confirm("Naya match shuru karein?")) {
+                s.p1Score=0; s.p2Score=0; s.board=1; s.queen=0; s.matchWinner=0; s.p1Color="white"; s.p2Color="black";
                 save();
             }
         }
